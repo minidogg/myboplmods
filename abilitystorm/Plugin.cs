@@ -6,15 +6,19 @@ using System.Reflection;
 using BoplFixedMath;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+using BepInEx.Logging;
 
 namespace BoplBattleTemplate
 {
-    [BepInPlugin(pluginGuid, "Ability Storm", "1.2.0")]
+    [BepInPlugin(pluginGuid, "Ability Storm", "1.3.0")]
     [BepInProcess("BoplBattle.exe")]
     public class Plugin : BaseUnityPlugin
     {
         public const string pluginGuid = "com.unluckycrafter.abilitystorm";
-        public static IInputSystem Current { get; }
+        public static int counter = 100;
+        public static int counter2 = 400;
+
 
         private void Awake()
         {
@@ -22,10 +26,12 @@ namespace BoplBattleTemplate
             // Plugin startup logic
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_NAME} is loaded!");//feel free to remove this
             Harmony harmony = new Harmony(pluginGuid);
+            //ability spawn
             MethodInfo original = AccessTools.Method(typeof(AbilitySpawner), "UpdateSim");
             MethodInfo patch = AccessTools.Method(typeof(Plugin), "UpdateSim_p");
             harmony.Patch(original, new HarmonyMethod(patch));
 
+            //set ability
             MethodInfo original2 = AccessTools.Method(typeof(SlimeController), "AddAdditionalAbility");
             MethodInfo patch2 = AccessTools.Method(typeof(Plugin), "AddAdditionalAbility_p");
             harmony.Patch(original2, new HarmonyMethod(patch2));
@@ -37,10 +43,12 @@ namespace BoplBattleTemplate
 
         public static bool AddAdditionalAbility_p(AbilityMonoBehaviour ability, Sprite indicatorSprite, GameObject abilityPrefab, ref SlimeController __instance, ref Fix[] ___abilityCooldownTimers)
         {
-            System.Random rnd = new System.Random();
             if (__instance.abilities.Count == 3)
             {
-                int temp = rnd.Next(0, 3);
+                counter += 1;
+                counter2 += 1;
+
+                int temp = (counter%4);
                 __instance.abilities[temp] = ability;
                 PlayerHandler.Get().GetPlayer(__instance.playerNumber).CurrentAbilities[2] = abilityPrefab;
                 __instance.AbilityReadyIndicators[temp].SetSprite(indicatorSprite, true);
@@ -71,14 +79,22 @@ namespace BoplBattleTemplate
         public static bool UpdateSim_p(Fix simDeltaTime, ref Fix ___time, ref Fix ___SpawnDelay, ref int ___spawns, ref int ___MaxSpawns, ref AbilitySpawner __instance, ref FixTransform ___fixTrans)
         {
             ___time += (GameTime.IsTimeStopped() ? Fix.Zero : simDeltaTime);
+            if(counter2 >= 21474836)
+            {
+                counter = 0;
+                counter2 = 0;
+            }
             if (___time > (Fix)0.5f)
             {
+                counter += 17;
+                counter2 += 32;
+
+
                 ___time = Fix.Zero;
                 //Spawn()
-                System.Random rnd = new System.Random();
                 Vec2 newPos = ___fixTrans.position;
-                newPos.x += (Fix)rnd.Next(-50, 50);
-                newPos.y += (Fix)rnd.Next(-50, 50);
+                newPos.x += (Fix)(counter%100)-(Fix)50;
+                newPos.y += (Fix)(counter2 % 50)- (Fix)20;
                 DynamicAbilityPickup dynamicAbilityPickup = FixTransform.InstantiateFixed<DynamicAbilityPickup>(__instance.pickupPrefab, newPos);
                 dynamicAbilityPickup.InitPickup(null, null, Updater.RandomUnitVector());
                 dynamicAbilityPickup.SwapToRandomAbility();

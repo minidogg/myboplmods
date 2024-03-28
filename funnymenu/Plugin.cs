@@ -172,10 +172,7 @@ namespace BoplBattleTemplate
                 {
                     antiKick = !antiKick;
                 }
-                if (GUI.Button(new Rect(60, 110, 170f, 30f), "Force start game"))
-                {
-                    /*CharacterSelectHandler_online.ForceStartGame();*/
-                }
+
 
             }
         }

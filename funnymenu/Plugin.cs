@@ -27,6 +27,8 @@ namespace BoplBattleTemplate
 
         static public bool antiKick = false;
         static public bool tryStart = false;
+        static public bool allowInvis = false;
+
 
 
         private void Awake()
@@ -42,11 +44,18 @@ namespace BoplBattleTemplate
             MethodInfo patch = AccessTools.Method(typeof(Plugin), "OnChatMessageCallback_p");
             harmony.Patch(original, new HarmonyMethod(patch));
 
- /*           MethodInfo original2 = AccessTools.Method(typeof(PlayerAverageCamera), "UpdateCamera");
-            MethodInfo patch2 = AccessTools.Method(typeof(Plugin), "UpdateCamera_P");
-            harmony.Patch(original2, new HarmonyMethod(patch2));*/
-        }
+            MethodInfo original2 = AccessTools.Method(typeof(Invisibility), "CastInvisibility");
+            MethodInfo patch2 = AccessTools.Method(typeof(Plugin), "CastInvisibility_p");
+            harmony.Patch(original2, new HarmonyMethod(patch2));
 
+            /*           MethodInfo original2 = AccessTools.Method(typeof(PlayerAverageCamera), "UpdateCamera");
+                       MethodInfo patch2 = AccessTools.Method(typeof(Plugin), "UpdateCamera_P");
+                       harmony.Patch(original2, new HarmonyMethod(patch2));*/
+        }
+        public static bool CastInvisibility_p(ref InstantAbility ___ia)
+        {
+            return allowInvis;
+        }
         /*private void UpdateCamera_P(ref PlayerAverageCamera ___instance, ref Camera __camera)
         {
             List<Player> list = PlayerHandler.Get().PlayerList();
@@ -121,7 +130,7 @@ namespace BoplBattleTemplate
 
         private void Update()
         {
-            if(tryStart==true)CharacterSelectHandler_online.TryStartGame();
+            if (tryStart == true) CharacterSelectHandler_online.TryStartGame();
         }
 
         public bool returnTrue()
@@ -129,7 +138,7 @@ namespace BoplBattleTemplate
             return true;
         }
 
-        public static bool OnChatMessageCallback_p(Lobby lobby, Friend sender, string msg,ref SteamManager ___instance)
+        public static bool OnChatMessageCallback_p(Lobby lobby, Friend sender, string msg, ref SteamManager ___instance)
         {
             MonoBehaviour.print("chat message callback: " + msg);
 
@@ -142,7 +151,7 @@ namespace BoplBattleTemplate
 
 
         //GUI Code
-        private Rect windowRect = new Rect(0, 20, 500, 500);
+        private Rect windowRect = new Rect(0, 50, 500, 500);
         public string GUIName = "Funny Menu";
         private UnityEngine.Color guiColor = UnityEngine.Color.cyan;
 
@@ -156,28 +165,33 @@ namespace BoplBattleTemplate
             GUI.backgroundColor = guiColor;
             GUI.color = guiColor;
 
-            if (GUI.Button(new Rect(0,0, 100, 20), "FM Open: " + boolToOnOffTag(fmEnabled))){
+            if (GUI.Button(new Rect(0, 30, 100, 20), "FM Open: " + boolToOnOffTag(fmEnabled)))
+            {
                 fmEnabled = !fmEnabled;
             }
 
-            if(fmEnabled==true)windowRect = GUI.Window(10000, windowRect, WindowGUI, GUIName);
+            if (fmEnabled == true) windowRect = GUI.Window(10000, windowRect, WindowGUI, GUIName);
 
             void WindowGUI(int windowID)
             {
-                if (GUI.Button(new Rect(60, 50, 170f, 30f), "Try Start Game Loop: " + boolToOnOffTag(tryStart)))
+                if (GUI.Button(new Rect(60, 80, 170f, 30f), "Try Start Game Loop: " + boolToOnOffTag(tryStart)))
                 {
                     tryStart = !tryStart;
                 }
-                if (GUI.Button(new Rect(60, 80, 170f, 30f), "Anti-Kick: "+boolToOnOffTag(antiKick) ))
+                if (GUI.Button(new Rect(60, 110, 170f, 30f), "Anti-Kick: " + boolToOnOffTag(antiKick)))
                 {
                     antiKick = !antiKick;
+                }
+                if (GUI.Button(new Rect(60, 140, 170f, 30f), "Allow Invis: " + boolToOnOffTag(allowInvis)))
+                {
+                    allowInvis = !allowInvis;
                 }
 
 
             }
         }
 
-         
+
 
     }
 

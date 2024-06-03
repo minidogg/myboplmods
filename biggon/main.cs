@@ -41,7 +41,7 @@ namespace BoplBattleTemplate
             MethodInfo patch2 = AccessTools.Method(typeof(Plugin), "LessCooldown");
             harmony.Patch(original2, null, new HarmonyMethod(patch2));
 
-/*            MethodInfo original3 = AccessTools.Method(typeof(Player), "Kill");
+            /*MethodInfo original3 = AccessTools.Method(typeof(Player), "Kill");
             MethodInfo patch3 = AccessTools.Method(typeof(Plugin), "TransferBiggon");
             harmony.Patch(original3, null, new HarmonyMethod(patch3));
 
